@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "cripto-aritmetica"
+version = "0.1.0"
+description = ""
+authors = ["Everson Esteves <119083241+esteveseverson@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+prompt-toolkit = "^3.0.48"
+pygments = "^2.18.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
