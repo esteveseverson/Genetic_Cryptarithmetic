@@ -111,11 +111,7 @@ def menu():
                         palavras.append(palavra.upper())  
                         print_text(
                             HTML(
-                                f'<bold>
-                                <cyan>
-                                Palavra {palavra} adicionada com sucesso!
-                                </cyan>
-                                </bold>'
+                                f'<bold><cyan>Palavra {palavra} adicionada com sucesso!</cyan></bold>'
                             )
                         )
                         break
