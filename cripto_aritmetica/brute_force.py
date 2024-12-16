@@ -1,11 +1,12 @@
-# Força bruta
+# Brute force solver
 
 import itertools
 import os
-from prompt_toolkit import prompt
-from prompt_toolkit.styles import Style
+
 from prompt_toolkit import print_formatted_text as print_text
+from prompt_toolkit import prompt
 from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.styles import Style
 
 
 # Função para limpar a tela
@@ -62,7 +63,12 @@ def criptoaritmetica(palavras):
             print_text(HTML('<bold><green>Palavras e Valores:</green></bold>'))
             for i, palavra in enumerate(palavras):
                 # Imprimindo a palavra seguida pelos valores
-                print_text(f'{" ".join(palavra)}\t\t{" ".join(str(letter_to_digit[letra]) for letra in palavra)}')
+                print_text(
+                    f'{" ".join(palavra)}\t\t{" ".join(
+                        str(letter_to_digit[letra]
+                        ) for letra in palavra
+                        )}'
+                )
 
                 if i == len(palavras) - 2:
                     print('-' * (len(palavras[-1]) * 7))
@@ -80,9 +86,15 @@ def menu():
     while True:
         # Exibe o menu com cores
         limpar_tela()
-        print_text(HTML('<bold><yellow>Menu:</yellow></bold>'))
-        print_text(HTML('<green>1. Inserir palavras e resolver criptaritimética</green>'))
-        print_text(HTML('<green>2. Sair</green>'))
+        print_text(HTML(
+            '<bold><yellow>Menu:</yellow></bold>'
+        ))
+        print_text(HTML(
+            '<green>1. Inserir palavras e resolver criptaritimética</green>'
+        ))
+        print_text(HTML(
+            '<green>2. Sair</green>')
+        )
 
         escolha = prompt("Escolha uma opção: ", style=style)
 
@@ -91,25 +103,49 @@ def menu():
             palavras = []
             for i in range(3):  # Solicita exatamente 3 palavras
                 while True:
-                    palavra = prompt(f"Digite a {i+1}ª palavra: ", style=style)
+                    palavra = prompt(
+                        f"Digite a {i + 1}ª palavra: ", style=style
+                    )
                     if palavra.isalpha():
-                        palavras.append(palavra.upper())  # Adiciona palavra em maiúsculas
-                        print_text(HTML(f'<bold><cyan>Palavra {palavra} adicionada com sucesso!</cyan></bold>'))
+                        # Adiciona palavra em maiúsculas
+                        palavras.append(palavra.upper())  
+                        print_text(
+                            HTML(
+                                f'<bold>
+                                <cyan>
+                                Palavra {palavra} adicionada com sucesso!
+                                </cyan>
+                                </bold>'
+                            )
+                        )
                         break
                     else:
-                        print_text(HTML('<bold><red>Por favor, insira apenas letras na palavra!</red></bold>'))
-            
+                        print_text(HTML(
+                            '''
+                            <bold>
+                            <red>
+                            Por favor, insira apenas letras na palavra!
+                            </red>
+                            </bold>
+                            '''
+                        ))
+
             limpar_tela()
-            print_text(HTML('<bold><yellow>Processando Requisição...</yellow></bold>'))
-            criptoaritmetica(palavras)  # Resolve a criptoaritmética com as palavras inseridas
-        
+            print_text(HTML(
+                '<bold><yellow>Processando Requisição...</yellow></bold>')
+            )
+            # Resolve a criptoaritmética com as palavras inseridas
+            criptoaritmetica(palavras)  
+
         elif escolha == "2":
             print_text(HTML('<bold><yellow>Saindo...</yellow></bold>'))
             break
-        
+
         else:
             limpar_tela()
-            print_text(HTML('<bold><red>Opção inválida. Tente novamente.</red></bold>'))
+            print_text(HTML(
+                '<bold><red>Opção inválida. Tente novamente.</red></bold>'
+            ))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
-import random
 import itertools
+import random
+
 
 # Função de fitness: calcula o erro absoluto da equação
 # |(SEND + MORE) - MONEY|
@@ -23,6 +24,7 @@ def calcular_fitness(individuo, letras, palavras):
     resultado = valores_palavras[-1]
     return abs(soma - resultado)
 
+
 # Gerar população inicial (aleatória, sem repetições)
 def gerar_populacao_inicial(tamanho, letras):
     populacao = []
@@ -32,10 +34,12 @@ def gerar_populacao_inicial(tamanho, letras):
             populacao.append(individuo)
     return populacao
 
+
 # Seleção por torneio (tamanho = 3)
 def selecao_torneio(populacao, fitness, k=3):
     torneio = random.sample(list(zip(populacao, fitness)), k)
     return min(torneio, key=lambda x: x[1])[0]
+
 
 # Seleção por roleta
 def selecao_roleta(populacao, fitness):
@@ -48,12 +52,14 @@ def selecao_roleta(populacao, fitness):
         if r <= valor:
             return populacao[i]
 
+
 # Mutação: troca de duas posições no vetor
 def mutacao(individuo, taxa):
     if random.random() < taxa:
         i, j = random.sample(range(len(individuo)), 2)
         individuo[i], individuo[j] = individuo[j], individuo[i]
     return individuo
+
 
 # Crossover PMX
 def crossover_pmx(pai1, pai2):
@@ -87,6 +93,7 @@ def crossover_pmx(pai1, pai2):
 
     return filho
 
+
 # Crossover Cíclico (CX)
 def crossover_ciclico(pai1, pai2):
     size = len(pai1)
@@ -112,8 +119,15 @@ def crossover_ciclico(pai1, pai2):
 
     return filho
 
+
 # Algoritmo Genético Principal
-def algoritmo_genetico(palavras, geracoes=50, tamanho_pop=100, taxa_crossover=0.8, taxa_mutacao=0.1):
+def algoritmo_genetico(
+    palavras,
+    geracoes=50,
+    tamanho_pop=100,
+    taxa_crossover=0.8,
+    taxa_mutacao=0.1
+):
     letras = ''.join(set(''.join(palavras)))
     assert len(letras) <= 10, "Mais de 10 letras únicas não suportadas."
 
@@ -122,7 +136,11 @@ def algoritmo_genetico(palavras, geracoes=50, tamanho_pop=100, taxa_crossover=0.
 
     for geracao in range(geracoes):
         # Avaliar fitness de cada indivíduo
-        fitness = [calcular_fitness(individuo, letras, palavras) for individuo in populacao]
+        fitness = [
+            calcular_fitness(
+                individuo, letras, palavras
+                ) for individuo in populacao
+        ]
 
         # Verificar se alguma solução foi encontrada
         if 0 in fitness:
@@ -150,9 +168,14 @@ def algoritmo_genetico(palavras, geracoes=50, tamanho_pop=100, taxa_crossover=0.
         populacao = nova_populacao
 
     # Retornar melhor solução encontrada ao final das gerações
-    fitness = [calcular_fitness(individuo, letras, palavras) for individuo in populacao]
+    fitness = [
+        calcular_fitness(
+            individuo, letras, palavras
+            ) for individuo in populacao
+    ]
     melhor_individuo = populacao[fitness.index(min(fitness))]
     return dict(zip(letras, melhor_individuo))
+
 
 # Testar o algoritmo com o problema SEND + MORE = MONEY
 if __name__ == "__main__":
