@@ -144,11 +144,22 @@ def mutate(individual: dict, letters: List[str], word1: str, word2: str, word3: 
 
 def crossover(parent1: dict, parent2: dict, word1, word2, word3) -> dict:
     child = {}
-    for key in parent1.keys():
-        child[key] = parent1[key] if random.random() > 0.5 else parent2[key]
+    chiled_fitness = float('inf')
+    tries = 0
+    best_parent = max(fitness(parent1, word1, word2, word3), fitness(parent2, word1, word2, word3))
+    
+    while (chiled_fitness > best_parent) or (tries > 1000):
+        tries += 1
+        for key in parent1.keys():
+            child[key] = parent1[key] if random.random() > 0.5 else parent2[key]
 
-    if len(set(child.values())) != len(child.values()):
-        return mutate(child, list(child.keys()), word1, word2, word3)  # Mutate if duplicate values are introduced
+        if len(set(child.values())) != len(child.values()):
+            # Assert the mutate dont duplicate a individual
+            return mutate(child, list(child.keys()), word1, word2, word3)
+        
+        chiled_fitness = fitness(child, word1, word2, word3)
+
+    # print(chiled_fitness < best_parent)
     return child
 
 
