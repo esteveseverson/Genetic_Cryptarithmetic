@@ -22,7 +22,7 @@ def generate_population(
 
         # Ensure all values are unique
         if len(set(individual.values())) == len(individual.values()):
-            if fitness(individual, word1, word2, word3) < 10000:
+            if fitness(individual, word1, word2, word3) < 8500:
                 population.append(individual)
         # print(len(population))
 
@@ -79,22 +79,23 @@ def fitness(individual: dict, word1: str, word2: str, word3: str) -> float:
     return abs((val1 + val2) - val3) / 100
 
 
-def mutate(
-    individual: dict,
-    letters: List[str],
-    word1: str,
-    word2: str,
-    word3: str
-) -> dict:
+def mutate(individual: dict, letters: List[str], word1: str, word2: str, word3: str) -> dict:
     mutated = individual.copy()
     letter = random.choice(letters)
-    new_value = random.choice(
-        [i for i in range(10) if i not in individual.values()]
-    )
-    while mutated == individual:
+    new_value = random.randint(1, 9)
+    
+    # if exists, change between
+    if new_value in individual.values():
+        for k, v in individual.items():
+            if v == new_value:
+                mutated[k], mutated[letter] = mutated[letter], mutated[k]
+                break
+    else:
         mutated[letter] = new_value
-        if fitness(mutated, word1, word2, word3) == float('inf'):
-            mutated == individual
+    
+    if fitness(mutated, word1, word2, word3) < fitness(individual, word1, word2, word3):
+        return individual
+    
     return mutated
 
 

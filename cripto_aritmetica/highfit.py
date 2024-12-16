@@ -22,11 +22,11 @@ def generate_population(
         if len(set(individual.values())) == len(individual.values()):  # Ensure all values are unique
             # Valida os carry-overs de 10% da população
             if len(population) < int(size * 0.5):
-                if fitness(individual, word1, word2, word3) < int(size * 30):
+                if fitness(individual, word1, word2, word3) < int(size * 25):
                     # print('bom individuo', individual)
                     population.append(individual)
             else:
-                if fitness(individual, word1, word2, word3) < int(size * 75):
+                if fitness(individual, word1, word2, word3) < int(size * 60):
                      # print('placebo', individual)
                     population.append(individual)
 
@@ -125,11 +125,20 @@ def validate_carry_overs(individual: dict, word1: str, word2: str, word3: str) -
 def mutate(individual: dict, letters: List[str], word1: str, word2: str, word3: str) -> dict:
     mutated = individual.copy()
     letter = random.choice(letters)
-    new_value = random.choice([i for i in range(10) if i not in individual.values()])
-    while mutated == individual:
+    new_value = random.randint(1, 9)
+    
+    # if exists, change between
+    if new_value in individual.values():
+        for k, v in individual.items():
+            if v == new_value:
+                mutated[k], mutated[letter] = mutated[letter], mutated[k]
+                break
+    else:
         mutated[letter] = new_value
-        if fitness(mutated, word1, word2, word3) < fitness(individual, word1, word2, word3):
-            mutated == individual
+    
+    if fitness(mutated, word1, word2, word3) < fitness(individual, word1, word2, word3):
+        return individual
+    
     return mutated
 
 
@@ -223,7 +232,12 @@ if __name__ == "__main__":
     word3 = input("Enter the result word: ").upper()
 
     solution = genetic_algorithm(word1, word2, word3)
+    val1 = decode(solution, word1)
+    val2 = decode(solution, word2)
+    val3 = decode(solution, word3)
     if solution:
-        print("Solution:", solution)
+        print(solution)
         print(f"{word1} + {word2} = {word3}")
-        print(f"{decode(solution, word1)} + {decode(solution, word2)} = {decode(solution, word3)}")
+        print(f"{val1} + ", end=' ')
+        print(f'{val2} = ', end=' ')
+        print(f'{val3}, err: {val1 + val2 - val3}')
