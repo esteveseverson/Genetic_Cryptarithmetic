@@ -1,91 +1,174 @@
+import random
 import itertools
-from prompt_toolkit import prompt
-from prompt_toolkit.completion import WordCompleter
 
+# Função de fitness: calcula o erro absoluto da equação
+# |(SEND + MORE) - MONEY|
+def calcular_fitness(individuo, letras, palavras):
+    letter_to_digit = dict(zip(letras, individuo))
 
-def verificar_equacao(letters, valores, palavras):
-    # Mapeando as letras para os valores correspondentes
-    letter_to_digit = dict(zip(letters, valores))
-
-    # Função para converter uma palavra de letras para número
     def palavra_para_numero(palavra):
-        return int(''.join(str(letter_to_digit[letra]) for letra in palavra))
+        # Converter palavra em número, verificando se não há zeros à esquerda
+        numero = ''.join(str(letter_to_digit[letra]) for letra in palavra)
+        if numero[0] == '0':
+            return None
+        return int(numero)
 
-    # Convertendo as palavras para números
     valores_palavras = [palavra_para_numero(palavra) for palavra in palavras]
+
+    # Verificar se algum número é inválido (zeros à esquerda)
+    if None in valores_palavras:
+        return float('inf')
 
     soma = sum(valores_palavras[:-1])
     resultado = valores_palavras[-1]
+    return abs(soma - resultado)
 
-    return soma, resultado
+# Gerar população inicial (aleatória, sem repetições)
+def gerar_populacao_inicial(tamanho, letras):
+    populacao = []
+    while len(populacao) < tamanho:
+        individuo = random.sample(range(10), len(letras))
+        if individuo not in populacao:
+            populacao.append(individuo)
+    return populacao
 
+# Seleção por torneio (tamanho = 3)
+def selecao_torneio(populacao, fitness, k=3):
+    torneio = random.sample(list(zip(populacao, fitness)), k)
+    return min(torneio, key=lambda x: x[1])[0]
 
-def criptoaritmetica(palavras):
-    # Extraindo as letras únicas das palavras
-    letras = ''.join(palavras)
-    letras_unicas = set(letras)  # Retira letras repetidas
-    assert len(letras_unicas) <= 10, 'Há mais de 10 letras diferentes!'
+# Seleção por roleta
+def selecao_roleta(populacao, fitness):
+    fitness_normalizado = [1 / (f + 1e-6) for f in fitness]
+    total_fitness = sum(fitness_normalizado)
+    probabilidades = [f / total_fitness for f in fitness_normalizado]
+    acumulada = list(itertools.accumulate(probabilidades))
+    r = random.uniform(0, 1)
+    for i, valor in enumerate(acumulada):
+        if r <= valor:
+            return populacao[i]
 
-    # Identificando as letras que estão no início de cada palavra
-    letras_iniciais = {palavra[0] for palavra in palavras}
+# Mutação: troca de duas posições no vetor
+def mutacao(individuo, taxa):
+    if random.random() < taxa:
+        i, j = random.sample(range(len(individuo)), 2)
+        individuo[i], individuo[j] = individuo[j], individuo[i]
+    return individuo
 
-    # Gerando todas as permutações possíveis para as letras
-    for perm in itertools.permutations(range(10), len(letras_unicas)):
-        # Verificando se as letras iniciais não são 0
-        letter_to_digit = dict(zip(letras_unicas, perm))
-        if any(letter_to_digit[letra] == 0 for letra in letras_iniciais):
-            continue
+# Crossover PMX
+def crossover_pmx(pai1, pai2):
+    size = len(pai1)
+    filho = [-1] * size
 
-        # Verificando a equação com essa permutação
-        soma, resultado = verificar_equacao(letras_unicas, perm, palavras)
+    # Escolher dois pontos de crossover
+    p1, p2 = sorted(random.sample(range(size), 2))
 
-        # Se a equação for válida, imprime o resultado
-        if soma == resultado:
-            # Exibindo as palavras e os valores das letras
-            print('Palavras e Valores:')
-            for i, palavra in enumerate(palavras):
-                # Imprimindo a palavra seguida pelos valores
-                print(f'{" ".join(palavra)}', end='\t\t')
-                print(
-                    f'{" ".join(str(letter_to_digit[letra]) for letra in palavra)}'
-                )
+    # Copiar segmento do pai1 para o filho
+    filho[p1:p2 + 1] = pai1[p1:p2 + 1]
 
-                if i == len(palavras) - 2:
-                    print('-' * (len(palavras[-1]) * 7))
+    # Resolver conflitos e preencher os valores restantes
+    for i in range(p1, p2 + 1):
+        if pai2[i] not in filho:
+            val = pai2[i]
+            pos = i
+            while True:
+                if pai1[pos] in pai2:
+                    pos = pai2.index(pai1[pos])
+                    if filho[pos] == -1:
+                        filho[pos] = val
+                        break
+                else:
+                    break
 
-            # Exibindo a solução
-            return
+    # Preencher os espaços vazios com o restante do pai2
+    for i in range(size):
+        if filho[i] == -1:
+            filho[i] = pai2[i]
 
-    print('Nenhuma solução encontrada.')
+    return filho
 
+# Crossover Cíclico (CX)
+def crossover_ciclico(pai1, pai2):
+    size = len(pai1)
+    filho = [-1] * size
+    start = 0
 
-def menu():
-    while True:
-        # Exibe o menu
-        print("\nMenu:")
-        print("1. Inserir palavras e resolver criptaritimética")
-        print("2. Sair")
+    while -1 in filho:
+        if filho[start] == -1:
+            pos = start
+            while True:
+                filho[pos] = pai1[pos]
+                if pai2[pos] in pai1:
+                    pos = pai1.index(pai2[pos])
+                    if pos == start:
+                        break
+                else:
+                    break
+        start += 1
 
-        # Obtém a escolha do usuário
-        escolha = prompt("Escolha uma opção: ")
+    for i in range(size):
+        if filho[i] == -1:
+            filho[i] = pai2[i]
 
-        if escolha == "1":
-            # O usuário insere as palavras
-            palavras_input = prompt("Digite as palavras separadas por espaço: ")
+    return filho
 
-            # Separa as palavras
-            palavras = palavras_input.split()
+# Algoritmo Genético Principal
+def algoritmo_genetico(palavras, geracoes=50, tamanho_pop=100, taxa_crossover=0.8, taxa_mutacao=0.1):
+    letras = ''.join(set(''.join(palavras)))
+    assert len(letras) <= 10, "Mais de 10 letras únicas não suportadas."
 
-            # Executa a função de criptoaritmética
-            criptoaritmetica(palavras)
-        
-        elif escolha == "2":
-            print("Saindo...")
-            break
-        
-        else:
-            print("Opção inválida. Tente novamente.")
+    # Gerar população inicial
+    populacao = gerar_populacao_inicial(tamanho_pop, letras)
 
+    for geracao in range(geracoes):
+        # Avaliar fitness de cada indivíduo
+        fitness = [calcular_fitness(individuo, letras, palavras) for individuo in populacao]
 
+        # Verificar se alguma solução foi encontrada
+        if 0 in fitness:
+            melhor_individuo = populacao[fitness.index(0)]
+            return dict(zip(letras, melhor_individuo))
+
+        # Nova população com elitismo
+        nova_populacao = []
+        elitismo = sorted(zip(populacao, fitness), key=lambda x: x[1])[:2]
+        nova_populacao.extend([ind[0] for ind in elitismo])
+
+        # Seleção, crossover e mutação
+        while len(nova_populacao) < tamanho_pop:
+            pai1 = selecao_roleta(populacao, fitness)
+            pai2 = selecao_roleta(populacao, fitness)
+
+            if random.random() < taxa_crossover:
+                filho = crossover_pmx(pai1, pai2)
+            else:
+                filho = crossover_ciclico(pai1, pai2)
+
+            filho = mutacao(filho, taxa_mutacao)
+            nova_populacao.append(filho)
+
+        populacao = nova_populacao
+
+    # Retornar melhor solução encontrada ao final das gerações
+    fitness = [calcular_fitness(individuo, letras, palavras) for individuo in populacao]
+    melhor_individuo = populacao[fitness.index(min(fitness))]
+    return dict(zip(letras, melhor_individuo))
+
+# Testar o algoritmo com o problema SEND + MORE = MONEY
 if __name__ == "__main__":
-    menu()
+    palavras = ["SEND", "MORE", "MONEY"]
+    solucao = algoritmo_genetico(palavras)
+
+    if solucao:
+        print("Solução encontrada:")
+        for letra, valor in solucao.items():
+            print(f"{letra}: {valor}")
+
+        send = int(''.join(str(solucao[letra]) for letra in "SEND"))
+        more = int(''.join(str(solucao[letra]) for letra in "MORE"))
+        money = int(''.join(str(solucao[letra]) for letra in "MONEY"))
+
+        print(f"\nSEND: {send}\nMORE: {more}\nMONEY: {money}")
+        print(f"\nVerificação: {send} + {more} = {money}")
+    else:
+        print("Nenhuma solução encontrada.")

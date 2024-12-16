@@ -1,3 +1,5 @@
+# Força bruta
+
 import itertools
 import os
 from prompt_toolkit import prompt
