@@ -1,4 +1,4 @@
-# high fit, better population but slower population gen
+
 
 import os
 import random
