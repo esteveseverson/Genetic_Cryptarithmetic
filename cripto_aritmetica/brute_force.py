@@ -108,7 +108,7 @@ def menu():
                     )
                     if palavra.isalpha():
                         # Adiciona palavra em maiúsculas
-                        palavras.append(palavra.upper())  
+                        palavras.append(palavra.upper())
                         print_text(
                             HTML(
                                 f'<bold><cyan>Palavra {palavra} adicionada com sucesso!</cyan></bold>'
@@ -131,7 +131,7 @@ def menu():
                 '<bold><yellow>Processando Requisição...</yellow></bold>')
             )
             # Resolve a criptoaritmética com as palavras inseridas
-            criptoaritmetica(palavras)  
+            criptoaritmetica(palavras)
 
         elif escolha == "2":
             print_text(HTML('<bold><yellow>Saindo...</yellow></bold>'))

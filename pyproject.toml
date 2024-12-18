@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.12"
 prompt-toolkit = "^3.0.48"
 pygments = "^2.18.0"
+openpyxl = "^3.1.5"
 
 
 [tool.poetry.group.dev.dependencies]
