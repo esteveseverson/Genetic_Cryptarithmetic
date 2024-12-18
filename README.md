@@ -21,8 +21,8 @@ This project uses **Python** and the **Poetry** package manager for dependency m
    ```
 2. Clone the repository and navigate to the project directory:
    ```bash
-   git clone <repository_url>
-   cd <project_directory>
+   git clone https://github.com/esteveseverson/Genetic_Cryptarithmetic
+   cd Genetic_Cryptarithmetic
    ```
 3. Install dependencies using Poetry:
    ```bash
